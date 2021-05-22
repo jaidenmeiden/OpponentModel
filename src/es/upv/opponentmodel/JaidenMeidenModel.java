@@ -165,6 +165,8 @@ public class JaidenMeidenModel extends OpponentModel {
 			set.add(new BOAparameter("n", 20.0, "The number of own best offers to be used for genetic operations"));
 			set.add(new BOAparameter("n_opponent", 20.0, "The number of opponent's best offers to be used for genetic operations"));
 		*/
+
+		set.add(new BOAparameter("delta", 0.001, "Weight increment"));
 		return set;
 	}
 
