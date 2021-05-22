@@ -22,6 +22,7 @@ public class JaidenMeidenModel extends OpponentModel {
 	/*
 	 * Define aquí los atributos de la clase y el objeto que necesites
 	 */
+	Bid lastOffert;
 	
 	
 
