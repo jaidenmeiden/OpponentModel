@@ -35,7 +35,7 @@ public class JaidenMeidenModel extends OpponentModel {
 
 	@Override
 	public String getName() {
-		return "Simple Frequency Model";
+		return "Jaiden Meiden";
 	}
 	
 	@Override
@@ -155,8 +155,7 @@ public class JaidenMeidenModel extends OpponentModel {
 	
 	@Override
 	public AdditiveUtilitySpace getOpponentUtilitySpace() {
-		AdditiveUtilitySpace utilitySpace = new UtilitySpaceAdapter(this, this.negotiationSession.getDomain());
-		return utilitySpace;
+		return new UtilitySpaceAdapter(this, this.negotiationSession.getDomain());
 	}
 	
 	@Override
