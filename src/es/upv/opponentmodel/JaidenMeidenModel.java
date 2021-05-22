@@ -42,7 +42,10 @@ public class JaidenMeidenModel extends OpponentModel {
 		/*En esta parte del código debes poner cualquier instrucción que necesites
 		 * para la inicialización del modelo de aprendizaje
 		 */
-		
+		countOffers = 0;
+		delta = parameters.get("delta");
+		weights = new HashMap<>();
+		values = new HashMap<>();
 		
 		
 	}
