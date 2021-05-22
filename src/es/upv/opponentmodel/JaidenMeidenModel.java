@@ -99,7 +99,51 @@ public class JaidenMeidenModel extends OpponentModel {
 		 * En esta parte del modelo debes poner la lógica empleada para que, dada una oferta,
 		 * se utilice el modelo de las preferencias del oponente para determinar su utilidad estimada
 		 */
-		return 0;
+		double utility = 0;
+
+		// Calculamos la suma del total de los pesos wi
+		// Este paso es necesario ya que al ir sumando el valor delta,
+		// los pesos pueden haber cambiado su escala de 0 a 1. Usaremos
+		// esta suma de pesos para normalizar los pesos una vez lo necesitemos.
+		double weightsSum = weights.values().stream().mapToDouble(Double::doubleValue).sum();
+
+		// Escalar los pesos (si es necesario)
+		if (weightsSum > 1) {
+			for (Map.Entry<Integer, Double> entry : weights.entrySet()) {
+				int issueId = entry.getKey();
+				double weight = entry.getValue();
+				weight /= weightsSum;
+				weights.put(issueId, weight);
+			}
+		}
+
+		// Para cada atributo de la oferta a evaluar, se obtiene el número de veces que ha aparecido
+		// el valor de dicho atributo en las ofertas enviadas por el oponente. La estimación de Vi
+		// para dicho atributo será calculada de acuerdo a la fórmula: ** V_i_t(X_i) = #X_i/r **.
+		// Donde:
+		// ** #X_i ** representa el número de veces que el valor Xi ha sido recibido del oponente en el histórico de la negociación
+		// ** r ** representa el número total de ofertas recibidas del oponente
+
+		// Obtener contadores de los valores, actualizar V_i_t y calcular la utilidad
+		for (Map.Entry<Integer, Map<Value, Integer>> entry : values.entrySet()) {
+			int issueId = entry.getKey();
+			Map<Value, Integer> value = entry.getValue();
+
+			if (value != null) {
+				Integer valueCount = value.get(bid.getValue(issueId));
+				if (valueCount != null) {
+					double weight = weights.get(issueId);
+					// V_i_t(X_i) = #X_i/r
+					double function = (double) valueCount / countOffers;
+					// Acumulamos la utilidad aportada por la oferta como la suma acumulada del
+					// peso normalizado del atributo por la estimación de V_i_t.
+					// Formula: U(X) = Sumatoria(W_i * V_i_t(X_i))
+					utility += weight * function;
+				}
+			}
+		}
+
+		return utility;
 	}
 	
 	@Override
