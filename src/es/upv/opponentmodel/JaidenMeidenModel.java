@@ -56,8 +56,41 @@ public class JaidenMeidenModel extends OpponentModel {
 		  * En esta parte del código debes poner la lógica a realizar por el modelo
 		  * cuando una oferta del oponente es recibida
 		  */
-		
-		
+
+		// Actualizar el número de ofertas recibidas,
+		// así como la última oferta recibida del oponente.
+		lastOffert = bid;
+		countOffers++;
+
+		for (Map.Entry<Integer, Value> entry : bid.getValues().entrySet()) {
+			int issueId = entry.getKey();
+			Value bidValue = entry.getValue();
+			// Actualizar los pesos wi
+			// El peso para un atributo i únicamente debería actualizarse si el valor ofrecido
+			// por el oponente en ese atributo NO ha cambiado con respecto a la última oferta
+			// recibida.
+			if (lastOffert.getValue(issueId) == bidValue) {
+				double oldWeight = weights.get(issueId);
+				weights.put(issueId, oldWeight + delta);
+			}
+			// Cuenta de cuántas veces ha aparecido cada
+			// valor de atributo en las ofertas del oponente y
+			// debera actualizarse siempre.
+			Map<Value, Integer> valueCounter = values.get(issueId);
+			Integer valueCount = null;
+			if (valueCounter != null) {
+				valueCount = valueCounter.get(bidValue);
+			}
+			if (valueCount != null) {
+				valueCounter.put(bidValue, valueCount + 1);
+			} else {
+				valueCounter = new HashMap<>();
+				valueCounter.put(bidValue, 1);
+				values.put(issueId, valueCounter);
+			}
+		}
+
+
 	}
 	
 	@Override
