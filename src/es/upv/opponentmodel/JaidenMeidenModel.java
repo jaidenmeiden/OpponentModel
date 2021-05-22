@@ -26,6 +26,7 @@ public class JaidenMeidenModel extends OpponentModel {
 	int countOffers;
 	double delta;
 	Map<Integer, Double> weights;
+	Map<Integer, Map<Value, Integer>> values;
 	
 	
 
