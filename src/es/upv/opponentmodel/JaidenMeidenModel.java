@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import genius.core.Bid;
 import genius.core.Domain;
@@ -13,6 +14,7 @@ import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OpponentModel;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
+import genius.core.issue.Objective;
 import genius.core.issue.Value;
 import genius.core.utility.AdditiveUtilitySpace;
 import negotiator.boaframework.opponentmodel.tools.UtilitySpaceAdapter;
@@ -25,6 +27,7 @@ public class JaidenMeidenModel extends OpponentModel {
 	Bid lastOffert;
 	int countOffers;
 	double delta;
+	List<Integer> issueIds;
 	Map<Integer, Double> weights;
 	Map<Integer, Map<Value, Integer>> values;
 	
@@ -46,8 +49,12 @@ public class JaidenMeidenModel extends OpponentModel {
 		delta = parameters.get("delta");
 		weights = new HashMap<>();
 		values = new HashMap<>();
-		
-		
+		issueIds = negotiationSession.getIssues().stream().map(Objective::getNumber).collect(Collectors.toList());
+		int issueNumbers = issueIds.size();
+		for (int issueId : issueIds) {
+			weights.put(issueId, 1.0 / issueNumbers);
+			values.put(issueId, null);
+		}
 	}
 	
 	@Override
