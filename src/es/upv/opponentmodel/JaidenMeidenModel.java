@@ -8,12 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import genius.core.Bid;
-import genius.core.Domain;
 import genius.core.boaframework.BOAparameter;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OpponentModel;
-import genius.core.issue.Issue;
-import genius.core.issue.IssueDiscrete;
 import genius.core.issue.Objective;
 import genius.core.issue.Value;
 import genius.core.utility.AdditiveUtilitySpace;
@@ -27,11 +24,9 @@ public class JaidenMeidenModel extends OpponentModel {
 	Bid lastOffert;
 	int countOffers;
 	double delta;
-	List<Integer> issueIds;
+	List<Integer> issuesList;
 	Map<Integer, Double> weights;
-	Map<Integer, Map<Value, Integer>> values;
-	
-	
+	Map<Integer, Map<Value, Integer>> frecuencies;
 
 	@Override
 	public String getName() {
@@ -48,12 +43,12 @@ public class JaidenMeidenModel extends OpponentModel {
 		countOffers = 0;
 		delta = parameters.get("delta");
 		weights = new HashMap<>();
-		values = new HashMap<>();
-		issueIds = negotiationSession.getIssues().stream().map(Objective::getNumber).collect(Collectors.toList());
-		int issueNumbers = issueIds.size();
-		for (int issueId : issueIds) {
-			weights.put(issueId, 1.0 / issueNumbers);
-			values.put(issueId, null);
+		frecuencies = new HashMap<>();
+		issuesList = negotiationSession.getIssues().stream().map(Objective::getNumber).collect(Collectors.toList());
+		int issuesSize = issuesList.size();
+		for (int issueId : issuesList) {
+			weights.put(issueId, 1.0 / issuesSize);
+			frecuencies.put(issueId, null);
 		}
 	}
 	
@@ -83,7 +78,7 @@ public class JaidenMeidenModel extends OpponentModel {
 			// Cuenta de cuántas veces ha aparecido cada
 			// valor de atributo en las ofertas del oponente y
 			// debera actualizarse siempre.
-			Map<Value, Integer> valueCounter = values.get(issueId);
+			Map<Value, Integer> valueCounter = frecuencies.get(issueId);
 			Integer valueCount = null;
 			if (valueCounter != null) {
 				valueCount = valueCounter.get(bidValue);
@@ -93,7 +88,7 @@ public class JaidenMeidenModel extends OpponentModel {
 			} else {
 				valueCounter = new HashMap<>();
 				valueCounter.put(bidValue, 1);
-				values.put(issueId, valueCounter);
+				frecuencies.put(issueId, valueCounter);
 			}
 		}
 
@@ -132,7 +127,7 @@ public class JaidenMeidenModel extends OpponentModel {
 		// ** r ** representa el número total de ofertas recibidas del oponente
 
 		// Obtener contadores de los valores, actualizar V_i_t y calcular la utilidad
-		for (Map.Entry<Integer, Map<Value, Integer>> entry : values.entrySet()) {
+		for (Map.Entry<Integer, Map<Value, Integer>> entry : frecuencies.entrySet()) {
 			int issueId = entry.getKey();
 			Map<Value, Integer> value = entry.getValue();
 
