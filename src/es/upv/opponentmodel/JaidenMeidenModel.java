@@ -1,10 +1,6 @@
 package es.upv.opponentmodel;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import genius.core.Bid;
@@ -21,16 +17,18 @@ public class JaidenMeidenModel extends OpponentModel {
 	/*
 	 * Define aquí los atributos de la clase y el objeto que necesites
 	 */
-	Bid lastOffert;
+	Bid lastOffert; //Almacena la anterior oferta
+	Bid newOffert; //Almacena la ultima oferta
 	int countOffers;
 	double delta;
+	double multa;
 	List<Integer> issuesList;
 	Map<Integer, Double> weights;
 	Map<Integer, Map<Value, Integer>> frecuencies;
 
 	@Override
 	public String getName() {
-		return "Jaiden Meiden";
+		return "Jaiden Meiden (Mejora)";
 	}
 	
 	@Override
@@ -42,6 +40,7 @@ public class JaidenMeidenModel extends OpponentModel {
 		 */
 		countOffers = 0;
 		delta = parameters.get("delta");
+		multa = parameters.get("multa");
 		weights = new HashMap<>();
 		frecuencies = new HashMap<>();
 		issuesList = negotiationSession.getIssues().stream().map(Objective::getNumber).collect(Collectors.toList());
@@ -61,19 +60,32 @@ public class JaidenMeidenModel extends OpponentModel {
 
 		// Actualizar el número de ofertas recibidas,
 		// así como la última oferta recibida del oponente.
-		lastOffert = bid;
+		lastOffert = newOffert;
+		newOffert = bid;
 		countOffers++;
 
-		for (Map.Entry<Integer, Value> entry : bid.getValues().entrySet()) {
+		//Obtenemos los valos de la oferta anterior
+		List<String> lastValuesList = new ArrayList<>();
+		for (Map.Entry<Integer, Value> entry : lastOffert.getValues().entrySet()) {
+			String value = entry.getValue().toString();
+			lastValuesList.add(value);
+		}
+
+		for (Map.Entry<Integer, Value> entry : newOffert.getValues().entrySet()) {
 			int issueId = entry.getKey();
 			Value bidValue = entry.getValue();
 			// Actualizar los pesos wi
-			// El peso para un atributo i únicamente debería actualizarse si el valor ofrecido
-			// por el oponente en ese atributo NO ha cambiado con respecto a la última oferta
-			// recibida.
-			if (lastOffert.getValue(issueId) == bidValue) {
-				double oldWeight = weights.get(issueId);
-				weights.put(issueId, oldWeight + delta);
+			double oldWeight = weights.get(issueId);
+			// Buscamos si alguno de los valores de la nueva oferta está repetida y si esta repetido, se penaliza
+			if (lastValuesList.contains(bidValue.toString())) {
+				weights.put(issueId, oldWeight - multa); //Penalizanción.
+			}else {
+				// El peso para un atributo i únicamente debería actualizarse si el valor ofrecido
+				// por el oponente en ese atributo NO ha cambiado con respecto a la última oferta
+				// recibida.
+				if (newOffert.getValue(issueId) == bidValue) {
+					weights.put(issueId, oldWeight + delta);
+				}
 			}
 			// Cuenta de cuántas veces ha aparecido cada
 			// valor de atributo en las ofertas del oponente y
@@ -162,6 +174,7 @@ public class JaidenMeidenModel extends OpponentModel {
 		*/
 
 		set.add(new BOAparameter("delta", 0.001, "Weight increment"));
+		set.add(new BOAparameter("multa", 0.1, "Weight decrement"));
 		return set;
 	}
 
