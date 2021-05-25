@@ -75,15 +75,15 @@ public class JaidenMeidenModel extends OpponentModel {
 			int issueId = entry.getKey();
 			Value bidValue = entry.getValue();
 			// Actualizar los pesos wi
-			double oldWeight = weights.get(issueId);
-			// Buscamos si alguno de los valores de la nueva oferta está repetida y si esta repetido, se penaliza
-			if (lastValuesList.contains(bidValue.toString())) {
-				weights.put(issueId, oldWeight - multa); //Penalizanción.
-			}else {
-				// El peso para un atributo i únicamente debería actualizarse si el valor ofrecido
-				// por el oponente en ese atributo NO ha cambiado con respecto a la última oferta
-				// recibida.
-				if (newOffert.getValue(issueId) == bidValue) {
+			if (newOffert.getValue(issueId) == bidValue) {
+				double oldWeight = weights.get(issueId);
+				// Buscamos si alguno de los valores de la nueva oferta está repetida y si esta repetido, se penaliza
+				if (lastValuesList.contains(bidValue.toString())) {
+					weights.put(issueId, oldWeight - multa); //Penalizanción.
+				}else {
+					// El peso para un atributo i únicamente debería actualizarse si el valor ofrecido
+					// por el oponente en ese atributo NO ha cambiado con respecto a la última oferta
+					// recibida.
 					weights.put(issueId, oldWeight + delta);
 				}
 			}
